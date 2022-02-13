@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <title>{%block title%} {%endblock%}</title>
+  </head>
+  <body>
+    <nav class="container-sm mt-3 ">
+      <a class='btn btn-info' href="{% url 'ecomapp:home' %}">Home</a> |
+      <a class='btn btn-info' href="{% url 'ecomapp:about' %}">About us</a> |
+      <a class='btn btn-info' href="{% url 'ecomapp:contact' %}">contect us</a> |
+      <a class='btn btn-info' href="{% url 'ecomapp:allproducts' %}">Categories</a> |
+      <a class='btn btn-info' href="{% url 'ecomapp:mycart' %}">View Cart</a> |
+       
+          {% if request.user.customer %}
+            Wellcome: {{ request.user.username }}
+            <a class='btn btn-info btn-sm ' href="{% url 'ecomapp:customerprofile' %}">Profile</a> |
+            <a class='btn btn-danger btn-sm ' href="{% url 'ecomapp:customerlogout' %}">Logout</a> |
+            {% else %}
+              <a class='btn btn-info' href="{% url 'ecomapp:customerregistration' %}">Register</a> |
+              <a class='btn btn-info' href="{% url 'ecomapp:customerlogin' %}">Login</a>
+          {% endif %}
+    </nav>
+    <hr>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 mx-auto">
+          <form action="{% url 'ecomapp:search' %}" method="GET" class='form-group' >
+            <input class="form-control" type="text" name="keyword" placeholder="Search product here..." required>
+            <button class='btn btn-primary mt-3 mx-5' >Search Product</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% block content%} {% endblock %}
+  </body>
+</html>
