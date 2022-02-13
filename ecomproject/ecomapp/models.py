@@ -49,6 +49,14 @@ class Product(models.Model):
         return self.title
 
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="prdoucts/images/")
+
+    def __str__(self):
+        return self.product.title
+
+
 
 class Cart(models.Model):
     # Customer may have many carts, but cart only belong to one customer

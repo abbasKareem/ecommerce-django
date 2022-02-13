@@ -21,7 +21,6 @@ class EcomMixin(object):
         return super().dispatch(request, *args, **kwargs)
 
 
-
 class HomeView(EcomMixin, TemplateView):
     template_name = 'home.html'
 
@@ -143,7 +142,6 @@ class ManageCartView(EcomMixin, View):
         return redirect('ecomapp:mycart')
 
 
-
 class EmptyCartView(EcomMixin, View):
     def get(self, request, *args, **kwargs):
         cart_id = request.session.get("cart_id", None)
@@ -172,7 +170,6 @@ class CheckoutView(EcomMixin, CreateView):
 
         return super().dispatch(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cart_id = self.request.session.get('cart_id', None)
@@ -180,10 +177,11 @@ class CheckoutView(EcomMixin, CreateView):
             cart_obj = Cart.objects.get(id=cart_id)
         else:
             cart_obj = None
-        
+
         context['cart'] = cart_obj
         return context
     # because Order model have a requeired feilds we need to use form_vaild
+
     def form_valid(self, form):
         cart_id = self.request.session.get("cart_id")
         if cart_id:
@@ -199,8 +197,6 @@ class CheckoutView(EcomMixin, CreateView):
         else:
             return redirect("ecomapp:home")
         return super().form_valid(form)
-
-
 
 
 class MyCartView(EcomMixin, TemplateView):
@@ -237,7 +233,6 @@ class CustomerRegistrationView(CreateView):
             return next_url
         else:
             return self.success_url
-        
 
 
 class CustomerLogoutView(View):
@@ -251,6 +246,7 @@ class CustomerLoginView(FormView):
     form_class = CustomerLoginForm
     success_url = reverse_lazy("ecomapp:home")
     # form_valid method is a type of post method and is available in createview, formview, updateview
+
     def form_valid(self, form):
         uname = form.cleaned_data.get("username")
         pword = form.cleaned_data.get("password")
@@ -275,7 +271,6 @@ class AboutView(EcomMixin, TemplateView):
 
 class ContectView(EcomMixin, TemplateView):
     template_name = 'contect.html'
-
 
 
 class CustomerProfileView(TemplateView):
@@ -321,10 +316,10 @@ class SearchView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         kw = self.request.GET.get("keyword")
-        results = Product.objects.filter(Q(title__icontains=kw) | Q(description__icontains=kw))
+        results = Product.objects.filter(
+            Q(title__icontains=kw) | Q(description__icontains=kw))
         context['results'] = results
         return context
-
 
 
 # Admin
@@ -344,7 +339,6 @@ class AdminLoginView(FormView):
         return super().form_valid(form)
 
 
-
 # admin username: sara
 # admin password: saraadmin@123
 
@@ -356,14 +350,15 @@ class AdminRequiredMixin(object):
         else:
             return redirect("/admin-login/")
         return super().dispatch(request, *args, **kwargs)
-    
+
 
 class AdminHomeView(AdminRequiredMixin, TemplateView):
     template_name = 'adminpages/adminhome.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pendingorders'] = Order.objects.filter(order_status="Order Received").order_by("-id")
+        context['pendingorders'] = Order.objects.filter(
+            order_status="Order Received").order_by("-id")
         return context
 
 
@@ -393,4 +388,24 @@ class AdminOrderStatusChangeView(AdminRequiredMixin, View):
         order_obj.save()
         return redirect(reverse_lazy("ecomapp:adminorderdetail", kwargs={"pk": order_id}))
 
-    
+
+class AdminProductListView(AdminRequiredMixin, ListView):
+    template_name = 'adminpages/adminproductlist.html'
+    queryset = Product.objects.all().order_by("-id")
+    context_object_name = "allproducts"
+
+
+class AdminProductCreateView(AdminRequiredMixin, CreateView):
+    template_name = 'adminpages/adminprdouctcreate.html'
+    form_class = ProductForm
+    success_url = reverse_lazy("ecomapp:adminproductlist")
+
+    # we need this function to handle saving "more_images" to Product table
+    def form_valid(self, form):
+        p = form.save()
+        images = self.request.FILES.getlist("more_images")
+        for i in images:
+            ProductImage.objects.create(product=p, image=i)
+
+
+        return super().form_valid(form)
